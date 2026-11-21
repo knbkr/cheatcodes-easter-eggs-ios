@@ -1,0 +1,27 @@
+# Cheatcodes – Easter Eggs / iPhone: ERSTER TESTBUILD (UNSIGNIERT)
+# Keine App-Store-Veröffentlichung. Erst nach Apple Signierung/Prüfung möglich.
+workflows:
+  ios_testbuild:
+    name: iPhone – erster Testbuild (Simulator)
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    environment:
+      node: v22.11.0
+      xcode: latest
+    scripts:
+      - name: App-Paket entpacken und iOS-Projekt generieren
+        script: |
+          set -e
+          mkdir -p build
+          unzip -oq app.zip -d build
+          cd build
+          npm install --no-audit --no-fund
+          npx cap add ios
+          npx cap sync ios
+      - name: iPhone-Simulator-Build ohne Apple-Signierung
+        script: |
+          set -e
+          cd build
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$CM_BUILD_DIR/derivedData" CODE_SIGNING_ALLOWED=NO build
+    artifacts:
+      - derivedData/Build/Products/Debug-iphonesimulator/App.app/**
